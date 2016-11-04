@@ -55,6 +55,7 @@ class HTTPClient(asyncore.dispatcher):
         self.request = request
         self.host,self.port = host,port
         self.countread = 0
+        self.starttime=T.time()
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect((host, port))
         (self.recvbuf, self.sendbuf) = (StringIO(), "")
@@ -88,10 +89,20 @@ class HTTPClient(asyncore.dispatcher):
             
             
             totalTime = T.time() - start
+            timelst.sort()
+            index=len(timelst)-1
             print 'Time Take for requests: '+ str(totalTime) + "s"
             print 'Completed requests: ' + str(GoodCount)
             print 'Failed requests: ' + str(BadCount)
             print 'Average request per sec: '+ str(GoodCount/totalTime) + "n/s"
+            print
+            print "Percentage of the requests served within a certain time"
+            print "50% "+str(timelst[int(index*0.5)])
+            print "60% "+str(timelst[int(index*0.6)])
+            print "70% "+str(timelst[int(index*0.7)])
+            print "80% "+str(timelst[int(index*0.8)])
+            print "90% "+str(timelst[int(index*0.9)])
+            print "100% "+str(timelst[int(index)])
             sys.exit()
         self.close()
         
@@ -108,9 +119,11 @@ class HTTPClient(asyncore.dispatcher):
     def handle_read(self):
         
         recv_bytes = self.recv(HTTPClient.RECV_CHUNK_SIZE)
+        global timelst
         if self.countread == 0:
             global BadCount
             global GoodCount
+            timelst+=[((T.time())-self.starttime)*1000]
             if recv_bytes[9:12] == '200':
                 GoodCount += 1
             else:
@@ -141,7 +154,7 @@ def AmountOfConcurrentRequests(maxConc,request,host,port):
         dic[obj.getSocket()] = obj
     global dic
     return dic
-    
+timelst=[]    
 global dic2
 dic2 =AmountOfConcurrentRequests(concurrent,request,host,port)
 
