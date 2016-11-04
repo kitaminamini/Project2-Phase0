@@ -140,7 +140,8 @@ class HTTPClient(asyncore.dispatcher):
 host, path, port = parse_url(url)
 request = make_request('GET', path,
             {'Host': host,
-             'Connection': 'close'}
+             'Connection': 'close',
+              'Ptag':'u5480574_u5780978'}
         )
 count = 0
 
